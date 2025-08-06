@@ -1,0 +1,56 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "version": "2",
+  "name": "ShiroGal",
+  "assetdir": "frontend/dist",
+  "reloaddirs": "frontend/src",
+  "build:dir": "build",
+  "frontend:dir": "./frontend",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev": "npm run dev",
+  "frontend:dev:build": "npm run build",
+  "frontend:dev:install": "npm install",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "wailsjsdir": "frontend/src/wailsjs",
+  "outputfilename": "ShiroGal",
+  "debounceMS": 100,
+  "devServer": "localhost:34115",
+  "appargs": "",
+  "runNonNativeBuildHooks": false,
+  "preBuildHooks": {
+    "GOOS/GOARCH": "",
+    "GOOS/*": "",
+    "*/*": ""
+  },
+  "postBuildHooks": {
+    "GOOS/GOARCH": "",
+    "GOOS/*": "",
+    "*/*": ""
+  },
+  "info": {
+    "companyName": "ShiroGal",
+    "productName": "ShiroGal",
+    "iconName": "ShiroACG",
+    "productVersion": "1.0.2",
+    "copyright": "Copyright © 2025 ShiroGal. All rights reserved.",
+    "comments": "",
+    "fileAssociations": [],
+    "protocols": []
+  },
+  "nsisType": "multiple",
+  "obfuscated": false,
+  "garbleargs": "",
+  "bindings": {
+    "ts_generation": {
+      "prefix": "",
+      "suffix": "",
+      "outputType": "classes"
+    }
+  },
+  "author": {
+    "name": "白猫",
+    "email": "z67x8c99b@gmail.com"
+  }
+}

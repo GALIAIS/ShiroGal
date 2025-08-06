@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-bs-theme="light">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ShiroGal</title>
+    <link rel="stylesheet" href="/vendor/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <script src="/vendor/marked/marked.umd.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- 全局与主题优化 --- */
+        :root {
+            /* 1. 字体定义 */
+            --bs-font-sans-serif: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+            /* 2. 全局圆角体系 */
+            --bs-border-radius: 0.5rem;
+            --bs-border-radius-sm: 0.375rem;
+            --bs-border-radius-lg: 0.75rem;
+            --bs-border-radius-xl: 1rem;
+            --bs-border-radius-pill: 50rem;
+
+            /* 3. 精细化阴影 */
+            --bs-box-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
+            --bs-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --bs-box-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+            /* 4. 禁止文本选中 */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* 5. 亮色主题配色 */
+        [data-bs-theme="light"] {
+            --bs-primary: #0d6efd;
+            --bs-primary-rgb: 13, 110, 253;
+            --bs-body-bg: #f8f9fa; /* 更柔和的背景 */
+            --bs-secondary-bg: #ffffff; /* 卡片等元素的背景 */
+            --bs-tertiary-bg: #f1f3f5; /* 输入框、按钮等次级背景 */
+            --bs-border-color: #dee2e6;
+            --bs-border-color-translucent: rgba(0, 0, 0, 0.08);
+        }
+
+        /* 6. 暗色主题配色 */
+        [data-bs-theme="dark"] {
+            --bs-primary: #4dabf7;
+            --bs-primary-rgb: 77, 171, 247;
+            --bs-body-bg: #18191a; /* 不用纯黑，用深灰色 */
+            --bs-secondary-bg: #242526;
+            --bs-tertiary-bg: #3a3b3c;
+            --bs-body-color: #e4e6eb;
+            --bs-border-color: #404040;
+            --bs-border-color-translucent: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            overflow: hidden;
+            background-color: var(--bs-body-bg);
+            transition: background-color 0.3s ease;
+        }
+
+        /* --- 布局与滚动条 --- */
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* 自定义滚动条 */
+        .content-area::-webkit-scrollbar, .preview-gallery::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .content-area::-webkit-scrollbar-track, .preview-gallery::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .content-area::-webkit-scrollbar-thumb, .preview-gallery::-webkit-scrollbar-thumb {
+            background-color: var(--bs-border-color-translucent);
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+
+        .content-area::-webkit-scrollbar-thumb:hover, .preview-gallery::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(var(--bs-primary-rgb), 0.5);
+        }
+
+        /* --- 头部 --- */
+        header {
+            border-bottom: 1px solid var(--bs-border-color);
+        }
+
+        #searchInput {
+            transition: all 0.2s ease-in-out;
+            border-color: var(--bs-tertiary-bg);
+        }
+
+        #searchInput:focus {
+            border-color: var(--bs-primary);
+            background-color: var(--bs-secondary-bg);
+            box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.15);
+        }
+
+        .settings-dropdown .dropdown-item.active, .settings-dropdown .dropdown-item:active {
+            background-color: rgba(var(--bs-primary-rgb), 0.15);
+            color: var(--bs-primary);
+        }
+
+        /* --- 卡片视图 - 经典美化样式 --- */
+        .results-view[data-view-mode="card"] {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            padding: 1.5rem;
+        }
+
+        .game-card {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid var(--bs-border-color-translucent);
+            background-color: var(--bs-secondary-bg);
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+            border-color: var(--bs-primary-border-subtle);
+        }
+
+        .game-card .card-img-top {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: var(--bs-tertiary-bg);
+        }
+
+        .game-card .card-body {
+            padding: 1rem;
+        }
+
+        .game-card .card-img-top {
+            width: 100%;
+            height: 180px; /* 固定图片高度 */
+            object-fit: cover;
+            background-color: var(--bs-tertiary-bg);
+            border-bottom: 1px solid var(--bs-border-color-translucent); /* 图片和内容间的细分割线 */
+        }
+
+        .game-card .card-body {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* 让body部分占据剩余空间，将次要信息推到底部 */
+        }
+
+        .game-card .card-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-card .card-text {
+            font-size: 0.875rem;
+            margin-top: auto; /* 关键：将此元素推到flex容器底部 */
+            padding-top: 0.5rem; /* 和标题之间留出一些空间 */
+        }
+
+
+        /* --- 列表视图 --- */
+        .results-view[data-view-mode="list"] {
+            padding: 0.5rem 0;
+        }
+
+        .game-list-item {
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid var(--bs-border-color);
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .game-list-item:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+
+        .game-list-item .list-cover {
+            width: 100%;
+            height: 50px;
+            object-fit: cover;
+            border-radius: var(--bs-border-radius-sm);
+            background-color: var(--bs-tertiary-bg);
+        }
+
+        .game-list-item:last-child {
+            border-bottom: none;
+        }
+
+
+        /* --- 详情页样式 --- */
+        .detail-view {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-header {
+            --wails-draggable: drag;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--bs-border-color);
+        }
+
+        .detail-header .btn {
+            --wails-draggable: no-drag;
+        }
+
+        .detail-content {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .detail-cover-container {
+            position: sticky;
+            top: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .detail-cover {
+            width: 100%;
+            border-radius: var(--bs-border-radius-lg);
+            box-shadow: var(--bs-box-shadow-lg);
+        }
+
+        .info-card {
+            background-color: var(--bs-secondary-bg);
+            border: none;
+            border-radius: var(--bs-border-radius-lg);
+            box-shadow: var(--bs-box-shadow-sm);
+        }
+
+        .info-card .card-body {
+            padding: 1.5rem;
+        }
+
+        #synopsis-content, .preview-gallery {
+            background-color: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: var(--bs-border-radius-lg);
+            padding: 1rem;
+        }
+
+        .synopsis-content.collapsed {
+            max-height: 120px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .synopsis-content.collapsed::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(to top, var(--bs-tertiary-bg) 20%, transparent);
+            pointer-events: none;
+        }
+
+        .preview-gallery {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 1rem;
+        }
+
+        .preview-gallery img {
+            height: 150px;
+            width: auto;
+            border-radius: var(--bs-border-radius);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .preview-gallery img:hover {
+            transform: scale(1.05);
+            border-color: var(--bs-primary);
+        }
+
+        .resource-item {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+            background-color: var(--bs-tertiary-bg);
+            padding: 1rem 1.5rem;
+            border-radius: var(--bs-border-radius-lg);
+            border: 1px solid var(--bs-border-color);
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .resource-item:hover {
+            background-color: var(--bs-secondary-bg);
+            border-color: var(--bs-primary);
+        }
+
+        .resource-item:not(:last-child) {
+            margin-bottom: 0.75rem;
+        }
+
+        .resource-item-info {
+            flex-grow: 1;
+            min-width: 200px;
+        }
+
+        .resource-item-actions {
+            margin-left: auto;
+            display: flex;
+            gap: .5rem;
+            flex-shrink: 0;
+        }
+
+        .tag-badge {
+            background-color: var(--bs-primary-bg-subtle);
+            color: var(--bs-emphasis-color) !important;
+            border: 1px solid transparent;
+            font-weight: 500;
+            padding: .4em .8em;
+            font-size: 0.85em;
+            transition: all 0.2s ease;
+        }
+
+        .tag-badge:hover {
+            background-color: var(--bs-primary);
+            color: var(--bs-white) !important;
+            transform: translateY(-2px);
+        }
+
+        /* --- 工具类 --- */
+        #scroll-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: none;
+            height: 44px;
+            width: 44px;
+            box-shadow: var(--bs-box-shadow);
+        }
+
+        .infinite-scroll-trigger {
+            grid-column: 1 / -1;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body class="bg-body-tertiary">
+<div id="main-layout" class="main-layout">
+    <header class="flex-shrink-0 bg-body-secondary shadow-sm p-3 d-flex justify-content-between align-items-center"
+            style="--wails-draggable: drag;">
+        <h5 class="mb-0 text-primary fw-bold">ShiroGal</h5>
+        <div class="input-group mx-4" style="--wails-draggable: no-drag;">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" id="searchInput" class="form-control" placeholder="输入游戏标题、品牌或标签...">
+        </div>
+        <div class="d-flex align-items-center" style="--wails-draggable: no-drag;">
+            <small id="syncStatus" class="text-muted me-3"></small>
+            <button class="btn btn-sm btn-outline-secondary me-2" id="refresh-button" title="重置并刷新"><i
+                    class="bi bi-arrow-clockwise"></i></button>
+            <div class="dropdown settings-dropdown">
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown"
+                        aria-expanded="false" title="设置"><i class="bi bi-gear-fill"></i></button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <h6 class="dropdown-header">主题设置</h6>
+                    </li>
+                    <li><a class="dropdown-item" id="theme-light"><i class="bi bi-sun-fill me-2"></i> 明亮模式</a></li>
+                    <li><a class="dropdown-item" id="theme-dark"><i class="bi bi-moon-stars-fill me-2"></i> 暗黑模式</a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <h6 class="dropdown-header">视图模式</h6>
+                    </li>
+                    <li><a class="dropdown-item view-mode-option" data-view="card"><i
+                            class="bi bi-grid-3x3-gap-fill me-2"></i> 卡片视图</a></li>
+                    <li><a class="dropdown-item view-mode-option" data-view="list"><i class="bi bi-list-ul me-2"></i>
+                        列表视图</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <h6 class="dropdown-header">分页设置</h6>
+                    </li>
+                    <li><a class="dropdown-item page-size-option" data-size="20">每页 20 条</a></li>
+                    <li><a class="dropdown-item page-size-option" data-size="50">每页 50 条</a></li>
+                    <li><a class="dropdown-item page-size-option" data-size="100">每页 100 条</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <h6 class="dropdown-header">浏览模式</h6>
+                    </li>
+                    <li><a class="dropdown-item layout-mode-option" data-mode="infinite"><i
+                            class="bi bi-infinity me-2"></i> 无限滚动</a></li>
+                    <li><a class="dropdown-item layout-mode-option" data-mode="pagination"><i
+                            class="bi bi-file-earmark-break-fill me-2"></i> 分页浏览</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <main class="content-area" id="content-area">
+        <div id="layout-infinite">
+            <div id="results-infinite" class="results-view" data-view-mode="card"></div>
+            <div id="scroll-trigger" class="d-flex justify-content-center py-4"></div>
+        </div>
+
+        <div id="layout-pagination" class="d-flex flex-column h-100 d-none">
+            <div id="results-pagination" class="results-view flex-grow-1" style="overflow-y: auto;"
+                 data-view-mode="card"></div>
+            <nav class="flex-shrink-0 bg-body-secondary p-2 d-flex justify-content-center align-items-center border-top">
+                <ul class="pagination mb-0">
+                    <li class="page-item" id="prev-page-item"><a class="page-link" href="#"
+                                                                 id="prev-page-button">上一页</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" id="page-info" href="#">第 1 页</a></li>
+                    <li class="page-item" id="next-page-item"><a class="page-link" href="#"
+                                                                 id="next-page-button">下一页</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <button id="scroll-to-top" class="btn btn-primary rounded-circle shadow-lg"><i
+                class="bi bi-arrow-up"></i></button>
+    </main>
+</div>
+
+<div id="detail-view" class="detail-view d-none">
+    <header class="detail-header bg-body-secondary shadow-sm p-3 d-flex align-items-center">
+        <button id="detail-back-button" class="btn btn-outline-secondary me-3"><i class="bi bi-arrow-left"></i>
+            返回
+        </button>
+        <h5 id="detail-title-header" class="mb-0 text-truncate"></h5>
+    </header>
+    <div class="detail-content">
+        <div class="container-fluid">
+            <div class="row g-4 py-4">
+                <div class="col-lg-4">
+                    <div class="detail-cover-container">
+                        <img id="detail-cover" src="" alt="Cover" class="detail-cover mb-4">
+                        <div id="detail-info-card" class="card info-card">
+                            <div class="card-body p-4">
+                                <h5 class="card-title mb-3">游戏信息</h5>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2 d-flex align-items-center"><i
+                                            class="bi bi-building fs-5 me-3 text-muted"></i> <strong
+                                            id="detail-brand"></strong></li>
+                                    <li class="d-flex align-items-center"><i
+                                            class="bi bi-calendar-event fs-5 me-3 text-muted"></i> <span
+                                            id="detail-date"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="p-lg-3">
+                        <h1 id="detail-title-cn" class="display-6 fw-bold mb-1"></h1>
+                        <h3 id="detail-title-jp" class="text-muted fw-light mb-4"></h3>
+                        <div id="detail-tags-container" class="mb-4 d-flex flex-wrap gap-2"></div>
+                        <hr class="my-4">
+
+                        <div class="card info-card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">游戏简介</h5>
+                                <div id="synopsis-content" class="synopsis-content collapsed text-break mt-3">
+                                    <div id="detail-synopsis"></div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a id="synopsis-toggle"
+                                       class="synopsis-toggle btn btn-sm btn-outline-primary rounded-pill px-3">展开阅读</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card info-card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">预览图</h5>
+                                <div id="detail-previews" class="preview-gallery mt-3"></div>
+                            </div>
+                        </div>
+
+                        <div class="card info-card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">资源链接</h5>
+                                <div id="detail-download-container" class="mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="image-viewer-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body p-0 text-center" data-bs-dismiss="modal" style="cursor: pointer;">
+                <img id="image-viewer-src" src="" class="img-fluid rounded" style="max-height: 90vh; cursor: default;"
+                     onclick="event.stopPropagation()">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/vendor/popperjs/popper.min.js"></script>
+<script src="/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+
+</html>
