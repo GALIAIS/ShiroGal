@@ -97,7 +97,7 @@ func (a *App) OnStartup(ctx context.Context) {
 	runtime.EventsEmit(a.ctx, "backend-ready")
 }
 
-func (a *App) OnShutdown() {
+func (a *App) OnShutdown(ctx context.Context) {
 	if a.db != nil {
 		a.db.Close()
 	}
