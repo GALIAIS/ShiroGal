@@ -1,0 +1,49 @@
+name: Build and Release for Windows
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Build Wails app for Windows
+        run: |
+          wails build -ldflags="\
+          -X main.dataServiceURL='${{ secrets.DATA_SERVICE_URL }}' \
+          -X main.publicKey='${{ secrets.TIDB_PUBLIC_KEY }}' \
+          -X main.privateKey='${{ secrets.TIDB_PRIVATE_KEY }}'" -clean
+
+      - name: Prepare Artifact for Release
+        run: |
+          mv "./build/bin/ShiroGal.exe" "./ShiroGal-windows-amd64.exe"
+        shell: bash
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ github.ref_name }}"
+          files: ShiroGal-windows-amd64.exe
+          generate_release_notes: true
