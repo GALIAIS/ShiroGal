@@ -45,8 +45,8 @@ wails build -ldflags="-X main.dataServiceURL=https://api.example.com/api/v1 -X m
 构建产物位于 `build/bin` 目录。
 
 ### 预览图
-![img.png](img.png)
-![img_1.png](img_1.png)
+<img width="1869" height="1363" alt="img" src="https://github.com/user-attachments/assets/c72810bb-8e74-4071-bd9b-8a7e2b8fc155" />
+<img width="2560" height="1528" alt="img_1" src="https://github.com/user-attachments/assets/152edfe0-191b-4185-a69c-378b660ada5a" />
 
 ## 🔧 技术栈
 - **框架**：Wails v2
