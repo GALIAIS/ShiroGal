@@ -54,7 +54,7 @@ jobs:
 
       - name: Build Wails app for Windows
         run: |
-          wails build -ldflags="-X main.dataServiceURL='${{ secrets.DATA_SERVICE_URL }}' -X main.publicKey='${{ secrets.TIDB_PUBLIC_KEY }}' -X main.privateKey='${{ secrets.TIDB_PRIVATE_KEY }}'" -clean -upx -webview2 embed
+          wails build -ldflags="-X main.dataServiceURL=${{ secrets.DATA_SERVICE_URL }} -X main.publicKey=${{ secrets.TIDB_PUBLIC_KEY }} -X main.privateKey=${{ secrets.TIDB_PRIVATE_KEY }}" -clean -upx -webview2 embed
 
       - name: Prepare Artifact for Release
         run: |
