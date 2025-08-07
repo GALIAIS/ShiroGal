@@ -25,11 +25,29 @@ jobs:
           go-version: '1.24'
           cache: true
 
-      - name: Setup Node
+      - name: Check for frontend lock file
+        id: check_lock_file
+        run: |
+          if [[ -f "frontend/package-lock.json" ]]; then
+            echo "lock_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "lock_exists=false" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+
+      - name: Setup Node (with cache)
+        if: steps.check_lock_file.outputs.lock_exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Node (no cache)
+        if: steps.check_lock_file.outputs.lock_exists == 'false'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
 
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
