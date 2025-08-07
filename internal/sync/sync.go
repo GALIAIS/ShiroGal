@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-func Run(db *database.Service, sourceRepo *api.SourceRepository) error {
+func Run(db *database.Service, apiClient *api.Client) error {
 
-	remoteIDs, err := sourceRepo.GetAllGameIDs()
+	remoteIDs, err := apiClient.GetAllActiveIDs()
 	if err != nil {
-		return fmt.Errorf("从数据源获取所有活跃ID失败: %w", err)
+		return fmt.Errorf("从API获取所有活跃ID失败: %w", err)
 	}
 
 	localIDs, err := db.GetAllGameIDs()
@@ -40,13 +40,12 @@ func Run(db *database.Service, sourceRepo *api.SourceRepository) error {
 
 	latestTime, err := db.GetLatestTimestamp()
 	if err != nil {
-		// 如果获取时间戳失败（例如数据库为空），我们从一个很早的时间开始同步
-		latestTime = time.Time{} // 使用零时，即公元1年1月1日
+		latestTime = time.Time{}
 	}
 
-	updates, err := sourceRepo.GetGamesSince(latestTime)
+	updates, err := apiClient.GetUpdates(latestTime)
 	if err != nil {
-		return fmt.Errorf("从数据源获取更新失败: %w", err)
+		return fmt.Errorf("从API获取更新失败: %w", err)
 	}
 
 	if len(updates) == 0 {

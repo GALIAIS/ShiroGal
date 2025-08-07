@@ -3,13 +3,11 @@ module galgame-gui
 go 1.24.5
 
 require (
-	github.com/go-sql-driver/mysql v1.9.3
 	github.com/mattn/go-sqlite3 v1.14.30
 	github.com/wailsapp/wails/v2 v2.10.2
 )
 
 require (
-	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
