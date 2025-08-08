@@ -3,41 +3,38 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"time"
 )
 
 type Galgame struct {
-	ID              int64
-	TitleJP         string
-	TitleCN         *string
-	Brand           *string
-	ReleaseDate     time.Time
-	Synopsis        *string
-	CoverURL        *string
-	PreviewURLs     *string
-	Tags            *string
-	DownloadLink    *string
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	WordpressPostID *int64
+	ID           int64
+	TitleJP      string
+	TitleCN      *string
+	Brand        *string
+	ReleaseDate  time.Time
+	Synopsis     *string
+	CoverURL     *string
+	PreviewURLs  *string
+	Tags         *string
+	DownloadLink *string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func (g *Galgame) UnmarshalJSON(data []byte) error {
 	type Alias struct {
-		ID              json.Number `json:"id"`
-		TitleJP         string      `json:"title_jp"`
-		TitleCN         *string     `json:"title_cn"`
-		Brand           *string     `json:"brand"`
-		ReleaseDate     *string     `json:"release_date"`
-		CreatedAt       *string     `json:"created_at"`
-		UpdatedAt       *string     `json:"updated_at"`
-		Synopsis        *string     `json:"synopsis"`
-		CoverURL        *string     `json:"cover_url"`
-		PreviewURLs     *string     `json:"preview_urls"`
-		Tags            *string     `json:"tags"`
-		DownloadLink    *string     `json:"download_link"`
-		WordpressPostID *string     `json:"wordpress_post_id"`
+		ID           json.Number `json:"id"`
+		TitleJP      string      `json:"title_jp"`
+		TitleCN      *string     `json:"title_cn"`
+		Brand        *string     `json:"brand"`
+		ReleaseDate  *string     `json:"release_date"`
+		CreatedAt    *string     `json:"created_at"`
+		UpdatedAt    *string     `json:"updated_at"`
+		Synopsis     *string     `json:"synopsis"`
+		CoverURL     *string     `json:"cover_url"`
+		PreviewURLs  *string     `json:"preview_urls"`
+		Tags         *string     `json:"tags"`
+		DownloadLink *string     `json:"download_link"`
 	}
 
 	var a Alias
@@ -71,13 +68,6 @@ func (g *Galgame) UnmarshalJSON(data []byte) error {
 		updatedAt, err := time.Parse(layout, *a.UpdatedAt)
 		if err == nil {
 			g.UpdatedAt = updatedAt
-		}
-	}
-
-	if a.WordpressPostID != nil && *a.WordpressPostID != "" {
-		wpID, err := strconv.ParseInt(*a.WordpressPostID, 10, 64)
-		if err == nil {
-			g.WordpressPostID = &wpID
 		}
 	}
 

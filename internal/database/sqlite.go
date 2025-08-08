@@ -48,7 +48,6 @@ func (s *Service) createTables() error {
         preview_urls TEXT,
         tags TEXT,
         download_link TEXT,
-        wordpress_post_id INTEGER,
         created_at DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')),
         updated_at DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now'))
     );`
@@ -148,8 +147,8 @@ func (s *Service) UpsertGames(games []models.Galgame) (int, error) {
 	}()
 
 	stmt, err := tx.Prepare(`
-        INSERT INTO games (id, title_jp, title_cn, brand, release_date, synopsis, cover_url, preview_urls, tags, download_link, wordpress_post_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO games (id, title_jp, title_cn, brand, release_date, synopsis, cover_url, preview_urls, tags, download_link)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
             title_jp=excluded.title_jp,
             title_cn=excluded.title_cn,
@@ -159,8 +158,7 @@ func (s *Service) UpsertGames(games []models.Galgame) (int, error) {
             cover_url=excluded.cover_url,
             preview_urls=excluded.preview_urls,
             tags=excluded.tags,
-            download_link=excluded.download_link,
-            wordpress_post_id=excluded.wordpress_post_id;
+            download_link=excluded.download_link;
     `)
 	if err != nil {
 		return 0, err
@@ -177,7 +175,7 @@ func (s *Service) UpsertGames(games []models.Galgame) (int, error) {
 		_, err := stmt.Exec(
 			game.ID, game.TitleJP, game.TitleCN, game.Brand,
 			game.ReleaseDate, game.Synopsis, game.CoverURL,
-			game.PreviewURLs, game.Tags, game.DownloadLink, game.WordpressPostID,
+			game.PreviewURLs, game.Tags, game.DownloadLink,
 		)
 		if err != nil {
 			log.Printf("插入/更新游戏ID %d 失败: %v", game.ID, err)
@@ -221,13 +219,13 @@ func (s *Service) GetGameByID(id int64) (models.Galgame, error) {
 	query := `SELECT 
                 id, title_jp, title_cn, brand, release_date, 
                 synopsis, cover_url, preview_urls, tags, download_link, 
-                created_at, updated_at, wordpress_post_id
+                created_at, updated_at
               FROM games WHERE id = ?;`
 
 	err := s.db.QueryRow(query, id).Scan(
 		&game.ID, &game.TitleJP, &game.TitleCN, &game.Brand, &game.ReleaseDate,
 		&game.Synopsis, &game.CoverURL, &game.PreviewURLs, &game.Tags, &game.DownloadLink,
-		&game.CreatedAt, &game.UpdatedAt, &game.WordpressPostID,
+		&game.CreatedAt, &game.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
